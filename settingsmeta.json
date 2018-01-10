@@ -1,0 +1,58 @@
+{
+    "name": "Mycroft Podcasts",
+    "skillMetadata": {
+        "sections": [
+            {
+                "name": "Podcast 1",
+                "fields": [
+                    {
+                        "type": "label",
+                        "label": "You can select up to three podcasts to listen to on your Mycroft. For each one, input a trigger word (podcast name) and the RSS feed URL which can be usually found at the podcast's website."
+                    },
+                    {
+                        "name": "nameone",
+                        "type": "text",
+                        "label": "Name to trigger PODCAST 1",
+                        "value": "",
+                        "placeholder": "Podcast 1 Name"
+                    },
+                    {
+                        "name": "feedone",
+                        "type": "text",
+                        "label": "RSS Feed for PODCAST 1",
+                        "value": "",
+                        "placeholder": "Podcast 1 RSS URL"
+                    },
+                    {
+                        "name": "nametwo",
+                        "type": "text",
+                        "label": "Name to trigger PODCAST 2",
+                        "value": "",
+                        "placeholder": "Podcast 2 Name"
+                    },
+                    {
+                        "name": "feedtwo",
+                        "type": "text",
+                        "label": "RSS Feed for PODCAST 2",
+                        "value": "",
+                        "placeholder": "Podcast 2 RSS URL"
+                    },
+                    {
+                        "name": "namethree",
+                        "type": "text",
+                        "label": "Name to trigger PODCAST 3",
+                        "value": "",
+                        "placeholder": "Podcast 3 Name"
+                    },
+                    {
+                        "name": "feedthree",
+                        "type": "text",
+                        "label": "RSS Feed for PODCAST 3",
+                        "value": "",
+                        "placeholder": "Podcast 3 RSS URL"
+                    }
+                ]
+            }
+        ]
+    }
+}
