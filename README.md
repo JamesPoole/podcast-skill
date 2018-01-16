@@ -2,7 +2,7 @@
 
 This skill allows you to listen to episodes of your favourite podcast
 
-## Usage
+## Setup
 You can enter your chosen podcasts into the Skills Settings section of the home.mycroft.ai site.
 Here you have space to store 3 podcasts. For each one you need to enter a trigger word and the feed
 url for the podcast. 
@@ -11,6 +11,7 @@ of the podcast (If the podcast has an unusual name like "The Nerdist" that Mycro
 you can change the trigger word to something clearer like "Nerd").
  - The feed url is a url that can usually be found on the podcasts website under the RSS logo.
 
+## Usage
 * `play the latest episode of the startup podcast`
 * `play the gimlet podcast reply all`
 * `play an episode of the art of manliness podcast`
@@ -23,6 +24,7 @@ Working features:
 
 Known issues:
  - Only tested on a Mark 1
+ - I have tested this skill with many feed urls. Most of the urls work but some cause issue. I am working to be compatible with those urls that do not work.
  - Not sure how this skill co-operates with other podcast skills
 
 TODO:
