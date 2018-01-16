@@ -12,9 +12,15 @@ you can change the trigger word to something clearer like "Nerd").
  - The feed url is a url that can usually be found on the podcasts website under the RSS logo.
 
 ## Usage
+This skill will allow you to play the latest episode of your chosen podcasts...
+
 * `play the latest episode of the startup podcast`
 * `play the gimlet podcast reply all`
 * `play an episode of the art of manliness podcast`
+
+You can also check if there are any new episodes available...
+* `check for any new episodes`
+* `are there any new podcasts available?`
 
 ## Current state
 

@@ -14,7 +14,7 @@
 
 import feedparser
 import time
-from os.path import dirname
+from os.path import dirname, join
 import re
 import json
 
@@ -85,8 +85,9 @@ class PodcastSkill(MycroftSkill):
 
     def handle_new_episode_intent(self, message):
         utter = message.data['utterance']
-        with open('/opt/mycroft/skills/podcast_skill/latest_check.json', 'r') as read_file:
-            last_check = json.loads(read_file)
+        json_path = join(self._dir, "latest_check.json")
+        with open(json_path, 'r') as read_file:
+            last_check = json.load(read_file)
 
         podcast_names = [self.settings["nameone"], self.settings["nametwo"], self.settings["namethree"]]
         podcast_urls = [self.settings["feedone"], self.settings["feedtwo"], self.settings["feedthree"]]
@@ -94,27 +95,32 @@ class PodcastSkill(MycroftSkill):
         #check if there are new episodes compared to the last check
         new_episodes = []
         for i in range(0, len(podcast_urls)):
-            data = feedparser.parse(url)
+            data = feedparser.parse(podcast_urls[i])
             last_episode = (data['entries'][0]['title'])
 
-            if last_check["latest_episode"][i] != last_episode:
-                last_check["latest_episode"][i] = last_episode
+            if last_check["latest_episodes"][i] != last_episode:
+                last_check["latest_episodes"][i] = last_episode
                 new_episodes.append(i)
 
+        #if the new episode list is empty, there are no new episodes
         if len(new_episodes) == 0:
             speech_string = "There are no new episodes of your favourite podcasts"
         else:
             #create the string for mycroft to say
             speech_string = "There are new episodes of "
+
             for i in range(0, len(new_episodes)):
                 #if the podcast is the last in a list add "and" before the podcast name
-                if i == len(new_episodes) and i > 0:
+                if i == (len(new_episodes)-1) and i > 0:
                     speech_string = speech_string + "and " + podcast_names[new_episodes[i]] + " "
                 else:
-                    speech_string = speech_string + podcast_names[new_episodes[i]] + " "
+                    speech_string = speech_string + podcast_names[new_episodes[i]] + ", "
 
-            with open('/opt/mycroft/skills/podcast_skill/latest_check.json', 'w') as write_file:
+            #update the latest check file
+            with open(join(self._dir, "latest_check.json"), 'w') as write_file:
                 json.dump(last_check, write_file)
+
+        self.speak(speech_string)
 
     def stop(self):
         pass
