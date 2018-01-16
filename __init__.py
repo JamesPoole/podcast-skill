@@ -11,14 +11,12 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Mycroft Core.  If not, see <http://www.gnu.org/licenses/>.
 
 import feedparser
 import time
 from os.path import dirname
 import re
+import json
 
 from adapt.intent import IntentBuilder
 from mycroft.skills.core import MycroftSkill
@@ -48,6 +46,10 @@ class PodcastSkill(MycroftSkill):
             "PlayPodcastKeyword").build()
         self.register_intent(play_podcast_intent, self.handle_play_podcast_intent)
 
+        new_episode_intent = IntentBuilder("NewEpisodeIntent").require(
+            "NewEpisodeKeyword").build()
+        self.register_intent(new_episode_intent, self.handle_new_episode_intent)
+
         if AudioService:
             self.audioservice = AudioService(self.emitter)
 
@@ -68,11 +70,8 @@ class PodcastSkill(MycroftSkill):
 
         self.speak_dialog('latest')
         time.sleep(3)
-
         
-        
-        #data["entries"][0]["media_content"][0]["url"]
-#data['entries'][0]['links'][0]['href']
+        #data['entries'][0]['links'][0]['href']
         #parse the feed URL
         data = feedparser.parse(self.listen_url)
 
@@ -81,10 +80,41 @@ class PodcastSkill(MycroftSkill):
         # if audio service module is available use it
         if self.audioservice:
             self.audioservice.play(episode, message.data['utterance'])
-        else: # othervice use normal mp3 playback
-            self.process = play_mp3(episode)
 
         self.enclosure.mouth_text(episode_title)
+
+    def handle_new_episode_intent(self, message):
+        utter = message.data['utterance']
+        with open('/opt/mycroft/skills/podcast_skill/latest_check.json', 'r') as read_file:
+            last_check = json.loads(read_file)
+
+        podcast_names = [self.settings["nameone"], self.settings["nametwo"], self.settings["namethree"]]
+        podcast_urls = [self.settings["feedone"], self.settings["feedtwo"], self.settings["feedthree"]]
+
+        #check if there are new episodes compared to the last check
+        new_episodes = []
+        for i in range(0, len(podcast_urls)):
+            data = feedparser.parse(url)
+            last_episode = (data['entries'][0]['title'])
+
+            if last_check["latest_episode"][i] != last_episode:
+                last_check["latest_episode"][i] = last_episode
+                new_episodes.append(i)
+
+        if len(new_episodes) == 0:
+            speech_string = "There are no new episodes of your favourite podcasts"
+        else:
+            #create the string for mycroft to say
+            speech_string = "There are new episodes of "
+            for i in range(0, len(new_episodes)):
+                #if the podcast is the last in a list add "and" before the podcast name
+                if i == len(new_episodes) and i > 0:
+                    speech_string = speech_string + "and " + podcast_names[new_episodes[i]] + " "
+                else:
+                    speech_string = speech_string + podcast_names[new_episodes[i]] + " "
+
+            with open('/opt/mycroft/skills/podcast_skill/latest_check.json', 'w') as write_file:
+                json.dump(last_check, write_file)
 
     def stop(self):
         pass
