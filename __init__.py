@@ -59,7 +59,10 @@ class PodcastSkill(MycroftSkill):
         podcast_names = [self.settings["nameone"], self.settings["nametwo"], self.settings["namethree"]]
         podcast_urls = [self.settings["feedone"], self.settings["feedtwo"], self.settings["feedthree"]]
 
+        self.listen_url = ""
         for i in range(0, len(podcast_names)):
+            if podcast_names[i] == "":
+               continue
             if podcast_names[i] in utter:
                 self.listen_url = podcast_urls[i]
         
@@ -95,6 +98,8 @@ class PodcastSkill(MycroftSkill):
         #check if there are new episodes compared to the last check
         new_episodes = []
         for i in range(0, len(podcast_urls)):
+            if not podcast_urls[i]:
+                continue
             data = feedparser.parse(podcast_urls[i])
             last_episode = (data['entries'][0]['title'])
 
