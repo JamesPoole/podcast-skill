@@ -63,7 +63,7 @@ class PodcastSkill(MycroftSkill):
         for i in range(0, len(podcast_names)):
             if podcast_names[i] == "":
                continue
-            if podcast_names[i] in utter:
+            if podcast_names[i].lower() in utter.lower():
                 self.listen_url = podcast_urls[i]
         
         #return false if Mycroft could not hear the name of the podcast
