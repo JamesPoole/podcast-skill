@@ -74,15 +74,22 @@ class PodcastSkill(MycroftSkill):
         self.speak_dialog('latest')
         time.sleep(3)
         
-        #data['entries'][0]['links'][0]['href']
         #parse the feed URL
         data = feedparser.parse(self.listen_url)
 
-        episode = (data["entries"][0]["media_content"][0]["url"])
+        try:
+            episode = (data["entries"][0]["media_content"][0]["url"])
+        except:
+            episode = (data['entries'][0]['links'][1]['href'])
+
         episode_title = (data['entries'][0]['title'])
         # if audio service module is available use it
         if self.audioservice:
-            self.audioservice.play(episode, message.data['utterance'])
+            self.audioservice.play(episode)
+        else: # othervice use normal mp3 playback
+            self.process = play_mp3(episode)
+
+
 
         self.enclosure.mouth_text(episode_title)
 
