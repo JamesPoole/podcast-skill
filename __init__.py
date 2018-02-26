@@ -17,15 +17,11 @@ import time
 from os.path import dirname, join
 import re
 import json
+import vlc
 
 from adapt.intent import IntentBuilder
 from mycroft.skills.core import MycroftSkill
 from mycroft.util.log import getLogger
-try:
-    from mycroft.skills.audioservice import AudioService
-except:
-    from mycroft.util import play_mp3
-    AudioService = None
 
 __author__ = 'jamespoole'
 
@@ -37,8 +33,9 @@ class PodcastSkill(MycroftSkill):
     def __init__(self):
         super(PodcastSkill, self).__init__(name="PodcastSkill")
 
+        self.episode = ""
         self.process = None
-        self.audioservice = None
+        self.player = vlc.MediaPlayer(self.episode)
         self.listen_url = ""
 
     def initialize(self):
@@ -49,9 +46,6 @@ class PodcastSkill(MycroftSkill):
         new_episode_intent = IntentBuilder("NewEpisodeIntent").require(
             "NewEpisodeKeyword").build()
         self.register_intent(new_episode_intent, self.handle_new_episode_intent)
-
-        if AudioService:
-            self.audioservice = AudioService(self.emitter)
 
     def handle_play_podcast_intent(self, message):
         utter = message.data['utterance']
@@ -65,31 +59,28 @@ class PodcastSkill(MycroftSkill):
                continue
             if podcast_names[i].lower() in utter.lower():
                 self.listen_url = podcast_urls[i]
-        
+
         #return false if Mycroft could not hear the name of the podcast
         if self.listen_url == "":
             self.speak_dialog('nomatch')
             return False
 
-        self.speak_dialog('latest')
-        time.sleep(3)
-        
         #parse the feed URL
         data = feedparser.parse(self.listen_url)
 
+        #Check what episode the user wants
+        episode_index = 0
+        self.speak_dialog('latest')
+        time.sleep(3)
+
         try:
-            episode = (data["entries"][0]["media_content"][0]["url"])
+            episode = (data["entries"][episode_index]["media_content"][0]["url"])
         except:
-            episode = (data['entries'][0]['links'][1]['href'])
+            episode = (data['entries'][episode_index]['links'][1]['href'])
 
         episode_title = (data['entries'][0]['title'])
-        # if audio service module is available use it
-        if self.audioservice:
-            self.audioservice.play(episode)
-        else: # othervice use normal mp3 playback
-            self.process = play_mp3(episode)
-
-
+        self.player = vlc.MediaPlayer(episode)
+        self.player.play()
 
         self.enclosure.mouth_text(episode_title)
 
@@ -135,7 +126,8 @@ class PodcastSkill(MycroftSkill):
         self.speak(speech_string)
 
     def stop(self):
-        pass
+        self.player.pause()
+        self.player.stop()
 
 def create_skill():
     return PodcastSkill()
