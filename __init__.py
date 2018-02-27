@@ -70,6 +70,14 @@ class PodcastSkill(MycroftSkill):
 
         #Check what episode the user wants
         episode_index = 0
+        response = self.get_response('episode.action')
+        if "play" in response:
+            pass
+        elif "next" in response and episode_index > 0:
+            episode_index = episode_index - 1
+        elif "previous" in response:
+            episode_index = episode_index + 1
+
         self.speak_dialog('latest')
         time.sleep(3)
 
