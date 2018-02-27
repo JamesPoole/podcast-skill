@@ -73,14 +73,23 @@ class PodcastSkill(MycroftSkill):
         self.speak_dialog('latest')
         time.sleep(3)
 
+        episode_title = (data['entries'][0]['title'])
+
+        #some feeds have different formats, these two were the most common ones I found so it will try them both
         try:
             episode = (data["entries"][episode_index]["media_content"][0]["url"])
         except:
-            episode = (data['entries'][episode_index]['links'][1]['href'])
-
-        episode_title = (data['entries'][0]['title'])
-        self.player = vlc.MediaPlayer(episode)
-        self.player.play()
+            try:
+                episode = (data['entries'][episode_index]['links'][1]['href'])
+            except:
+                self.speak_dialog('badrss')
+            
+        #Using the VLC player. Works well on Desktop, untested on other platforms
+        try:
+            self.player = vlc.MediaPlayer(episode)
+            self.player.play()
+        except:
+            pass
 
         self.enclosure.mouth_text(episode_title)
 
