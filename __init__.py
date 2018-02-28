@@ -11,17 +11,21 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-
 import feedparser
 import time
 from os.path import dirname, join
 import re
 import json
-import vlc
 
 from adapt.intent import IntentBuilder
 from mycroft.skills.core import MycroftSkill
 from mycroft.util.log import getLogger
+try:
+    from mycroft.skills.audioservice import AudioService
+except:
+    from mycroft.util import play_mp3
+    AudioService = None
+
 
 __author__ = 'jamespoole'
 
@@ -33,10 +37,9 @@ class PodcastSkill(MycroftSkill):
     def __init__(self):
         super(PodcastSkill, self).__init__(name="PodcastSkill")
 
-        self.episode = ""
         self.process = None
-        self.player = vlc.MediaPlayer(self.episode)
         self.listen_url = ""
+        self.audioservice = None
 
     def initialize(self):
         play_podcast_intent = IntentBuilder("PlayPodcastIntent").require(
@@ -46,6 +49,9 @@ class PodcastSkill(MycroftSkill):
         new_episode_intent = IntentBuilder("NewEpisodeIntent").require(
             "NewEpisodeKeyword").build()
         self.register_intent(new_episode_intent, self.handle_new_episode_intent)
+
+        if AudioService:
+            self.audioservice = AudioService(self.emitter)
 
     def handle_play_podcast_intent(self, message):
         utter = message.data['utterance']
@@ -84,12 +90,11 @@ class PodcastSkill(MycroftSkill):
             except:
                 self.speak_dialog('badrss')
             
-        #Using the VLC player. Works well on Desktop, untested on other platforms
-        try:
-            self.player = vlc.MediaPlayer(episode)
-            self.player.play()
-        except:
-            pass
+        # if audio service module is available use it
+        if self.audioservice:
+            self.audioservice.play(episode, message.data['utterance'])
+        else: # othervice use normal mp3 playback
+            self.process = play_mp3(episode)
 
         self.enclosure.mouth_text(episode_title)
 
@@ -135,8 +140,7 @@ class PodcastSkill(MycroftSkill):
         self.speak(speech_string)
 
     def stop(self):
-        self.player.pause()
-        self.player.stop()
+        pass
 
 def create_skill():
     return PodcastSkill()
