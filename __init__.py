@@ -12,6 +12,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 import feedparser
+import requests
 import time
 from os.path import dirname, join
 import re
@@ -25,7 +26,6 @@ try:
 except:
     from mycroft.util import play_mp3
     AudioService = None
-
 
 __author__ = 'jamespoole'
 
@@ -51,8 +51,8 @@ class PodcastSkill(MycroftSkill):
 
         if AudioService:
             self.audioservice = AudioService(self.emitter)
-            
-            
+
+
     def chosen_podcast(self, utter, podcast_names, podcast_urls):
         listen_url = ""
         for i in range(0, len(podcast_names)):
@@ -103,12 +103,15 @@ class PodcastSkill(MycroftSkill):
                 episode = (data['entries'][episode_index]['links'][1]['href'])
             except:
                 self.speak_dialog('badrss')
-            
+
+        #check for any redirects
+        episode = requests.head(episode, allow_redirects=True)
+
         # if audio service module is available use it
         if self.audioservice:
-            self.audioservice.play(episode, message.data['utterance'])
+            self.audioservice.play(episode.url, message.data['utterance'])
         else: # othervice use normal mp3 playback
-            self.process = play_mp3(episode)
+            self.process = play_mp3(episode.url)
 
         self.enclosure.mouth_text(episode_title)
 
