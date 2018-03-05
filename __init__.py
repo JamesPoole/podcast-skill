@@ -60,10 +60,10 @@ class PodcastSkill(MycroftSkill):
             if podcast_names[i] == "":
                continue
 	    try:
-    	        if podcast_names[i].lower() in utter.lower():
-                    listen_url = podcast_urls[i]
+	        if podcast_names[i].lower() in utter.lower():
+                listen_url = podcast_urls[i]
 	    except AttributeError:
-		pass
+    		pass
 
         return listen_url
 
@@ -76,14 +76,14 @@ class PodcastSkill(MycroftSkill):
         listen_url = self.chosen_podcast(utter, podcast_names, podcast_urls)
 
         #if misheard, retry and return false if Mycroft could not hear the name of the podcast
-	try_count = 0
+    	try_count = 0
         while (listen_url == "" and try_count < 2):
-	    try_count += 1
-            response = self.get_response('nomatch')
-            listen_url = self.chosen_podcast(response, podcast_names, podcast_urls)
-	    if try_count == 1 and listen_url == "":
-		self.speak_dialog('not.found')
-		return False
+    	    try_count += 1
+                response = self.get_response('nomatch')
+                listen_url = self.chosen_podcast(response, podcast_names, podcast_urls)
+    	    if try_count == 1 and listen_url == "":
+        		self.speak_dialog('not.found')
+        		return False
 
         #parse the feed URL
         data = feedparser.parse(listen_url)
