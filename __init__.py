@@ -38,7 +38,6 @@ class PodcastSkill(MycroftSkill):
         super(PodcastSkill, self).__init__(name="PodcastSkill")
 
         self.process = None
-        self.listen_url = ""
         self.audioservice = None
 
     def initialize(self):
@@ -52,6 +51,21 @@ class PodcastSkill(MycroftSkill):
 
         if AudioService:
             self.audioservice = AudioService(self.emitter)
+            
+            
+    def chosen_podcast(self, utter, podcast_names, podcast_urls):
+        listen_url = ""
+        for i in range(0, len(podcast_names)):
+            #check for empty podcast settings
+            if podcast_names[i] == "":
+               continue
+	    try:
+    	        if podcast_names[i].lower() in utter.lower():
+                    listen_url = podcast_urls[i]
+	    except AttributeError:
+		pass
+
+        return listen_url
 
     def handle_play_podcast_intent(self, message):
         utter = message.data['utterance']
@@ -59,20 +73,20 @@ class PodcastSkill(MycroftSkill):
         podcast_names = [self.settings["nameone"], self.settings["nametwo"], self.settings["namethree"]]
         podcast_urls = [self.settings["feedone"], self.settings["feedtwo"], self.settings["feedthree"]]
 
-        self.listen_url = ""
-        for i in range(0, len(podcast_names)):
-            if podcast_names[i] == "":
-               continue
-            if podcast_names[i].lower() in utter.lower():
-                self.listen_url = podcast_urls[i]
+        listen_url = self.chosen_podcast(utter, podcast_names, podcast_urls)
 
-        #return false if Mycroft could not hear the name of the podcast
-        if self.listen_url == "":
-            self.speak_dialog('nomatch')
-            return False
+        #if misheard, retry and return false if Mycroft could not hear the name of the podcast
+	try_count = 0
+        while (listen_url == "" and try_count < 2):
+	    try_count += 1
+            response = self.get_response('nomatch')
+            listen_url = self.chosen_podcast(response, podcast_names, podcast_urls)
+	    if try_count == 1 and listen_url == "":
+		self.speak_dialog('not.found')
+		return False
 
         #parse the feed URL
-        data = feedparser.parse(self.listen_url)
+        data = feedparser.parse(listen_url)
 
         #Check what episode the user wants
         episode_index = 0
