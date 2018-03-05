@@ -11,7 +11,8 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-import feedparser
+import podcastparser as pp
+import urllib
 import requests
 import time
 from os.path import dirname, join
@@ -85,24 +86,24 @@ class PodcastSkill(MycroftSkill):
                 self.speak_dialog('not.found')
                 return False
 
+        #normalise feeds
+        normalised_feed = pp.normalize_feed_url(listen_url)
+
         #parse the feed URL
-        data = feedparser.parse(listen_url)
+        parsed_feed = pp.parse(normalised_feed, urllib.urlopen(normalised_feed))
 
         #Check what episode the user wants
         episode_index = 0
         self.speak_dialog('latest')
         time.sleep(3)
 
-        episode_title = (data['entries'][0]['title'])
+        episode_title = (parsed_feed['entries'][0]['title'])
 
         #some feeds have different formats, these two were the most common ones I found so it will try them both
         try:
-            episode = (data["entries"][episode_index]["media_content"][0]["url"])
+            episode = (parsed_feed["episodes"][episode_index]["enclosures"][0]["url"])
         except:
-            try:
-                episode = (data['entries'][episode_index]['links'][1]['href'])
-            except:
-                self.speak_dialog('badrss')
+            self.speak_dialog('badrss')
 
         #check for any redirects
         episode = requests.head(episode, allow_redirects=True)
@@ -129,8 +130,8 @@ class PodcastSkill(MycroftSkill):
         for i in range(0, len(podcast_urls)):
             if not podcast_urls[i]:
                 continue
-            data = feedparser.parse(podcast_urls[i])
-            last_episode = (data['entries'][0]['title'])
+            parsed_feed = pp.parse(podcast_urls[i], urllib(podcast_urls[i]))
+            last_episode = (parsed_feed['episodes'][0]['title'])
 
             if last_check["latest_episodes"][i] != last_episode:
                 last_check["latest_episodes"][i] = last_episode
