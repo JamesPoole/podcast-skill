@@ -60,12 +60,11 @@ class PodcastSkill(MycroftSkill):
             #check for empty podcast settings
             if podcast_names[i] == "":
                continue
-        try:
-            if podcast_names[i].lower() in utter.lower():
-                listen_url = podcast_urls[i]
-        except AttributeError:
-            pass
-
+            try:
+                if podcast_names[i].lower() in utter.lower():
+                   listen_url = podcast_urls[i]
+            except:
+                pass
         return listen_url
 
     def handle_play_podcast_intent(self, message):
@@ -97,7 +96,7 @@ class PodcastSkill(MycroftSkill):
         self.speak_dialog('latest')
         time.sleep(3)
 
-        episode_title = (parsed_feed['entries'][0]['title'])
+        episode_title = (parsed_feed['episodes'][0]['title'])
 
         #some feeds have different formats, these two were the most common ones I found so it will try them both
         try:
@@ -130,7 +129,7 @@ class PodcastSkill(MycroftSkill):
         for i in range(0, len(podcast_urls)):
             if not podcast_urls[i]:
                 continue
-            parsed_feed = pp.parse(podcast_urls[i], urllib(podcast_urls[i]))
+            parsed_feed = pp.parse(podcast_urls[i], urllib.urlopen(podcast_urls[i]))
             last_episode = (parsed_feed['episodes'][0]['title'])
 
             if last_check["latest_episodes"][i] != last_episode:
