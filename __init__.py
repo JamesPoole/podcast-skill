@@ -105,13 +105,14 @@ class PodcastSkill(MycroftSkill):
             self.speak_dialog('badrss')
 
         #check for any redirects
-        episode = requests.head(episode, allow_redirects=True)
+        episode = urllib.urlopen(episode)
+        redirected_episode = episode.geturl()
 
         # if audio service module is available use it
         if self.audioservice:
-            self.audioservice.play(episode.url, message.data['utterance'])
+            self.audioservice.play(redirected_episode, message.data['utterance'])
         else: # othervice use normal mp3 playback
-            self.process = play_mp3(episode.url)
+            self.process = play_mp3(redirected_episode)
 
         self.enclosure.mouth_text(episode_title)
 
