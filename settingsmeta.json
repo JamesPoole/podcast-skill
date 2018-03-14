@@ -3,7 +3,7 @@
     "skillMetadata": {
         "sections": [
             {
-                "name": "Podcast 1",
+                "name": "Podcast Player",
                 "fields": [
                     {
                         "type": "label",

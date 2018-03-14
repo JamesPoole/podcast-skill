@@ -46,9 +46,9 @@ class PodcastSkill(MycroftSkill):
             "PlayPodcastKeyword").build()
         self.register_intent(play_podcast_intent, self.handle_play_podcast_intent)
 
-        new_episode_intent = IntentBuilder("NewEpisodeIntent").require(
-            "NewEpisodeKeyword").build()
-        self.register_intent(new_episode_intent, self.handle_new_episode_intent)
+        latest_episode_intent = IntentBuilder("LatestEpisodeIntent").require(
+            "LatestEpisodeKeyword").build()
+        self.register_intent(latest_episode_intent, self.handle_latest_episode_intent)
 
         if AudioService:
             self.audioservice = AudioService(self.emitter)
@@ -85,10 +85,8 @@ class PodcastSkill(MycroftSkill):
                 self.speak_dialog('not.found')
                 return False
 
-        #normalise feeds
+        #normalise feed and parse it
         normalised_feed = pp.normalize_feed_url(listen_url)
-
-        #parse the feed URL
         parsed_feed = pp.parse(normalised_feed, urllib.urlopen(normalised_feed))
 
         #Check what episode the user wants
@@ -116,44 +114,42 @@ class PodcastSkill(MycroftSkill):
 
         self.enclosure.mouth_text(episode_title)
 
-    def handle_new_episode_intent(self, message):
+    def handle_latest_episode_intent(self, message):
         utter = message.data['utterance']
-        json_path = join(self._dir, "latest_check.json")
-        with open(json_path, 'r') as read_file:
-            last_check = json.load(read_file)
 
         podcast_names = [self.settings["nameone"], self.settings["nametwo"], self.settings["namethree"]]
         podcast_urls = [self.settings["feedone"], self.settings["feedtwo"], self.settings["feedthree"]]
 
-        #check if there are new episodes compared to the last check
+        #check if the user specified a podcast to check for a new podcast
+        for i in range(0, len(podcast_names)):
+            #skip if podcast slot left empty
+            if podcast_names[i] == "":
+                continue
+            elif podcast_names[i].lower() in utter.lower():
+                parsed_feed = pp.parse(podcast_urls[i], urllib.urlopen(podcast_urls[i]))
+                last_episode = (parsed_feed['episodes'][0]['title'])
+
+                speech_string = "The latest episode of " + podcast_names[i] + " is " + last_episode
+                self.speak(speech_string)
+                return True
+
+        #if no podcast names are provided, list all new episodes
         new_episodes = []
         for i in range(0, len(podcast_urls)):
             if not podcast_urls[i]:
                 continue
             parsed_feed = pp.parse(podcast_urls[i], urllib.urlopen(podcast_urls[i]))
             last_episode = (parsed_feed['episodes'][0]['title'])
+            new_episodes.append(last_episode)
 
-            if last_check["latest_episodes"][i] != last_episode:
-                last_check["latest_episodes"][i] = last_episode
-                new_episodes.append(i)
-
-        #if the new episode list is empty, there are no new episodes
-        if len(new_episodes) == 0:
-            speech_string = "There are no new episodes of your favourite podcasts"
-        else:
-            #create the string for mycroft to say
-            speech_string = "There are new episodes of "
+            speech_string = "The latest episodes are the following: "
 
             for i in range(0, len(new_episodes)):
                 #if the podcast is the last in a list add "and" before the podcast name
                 if i == (len(new_episodes)-1) and i > 0:
-                    speech_string = speech_string + "and " + podcast_names[new_episodes[i]] + " "
+                    speech_string = speech_string + "and " + podcast_names[i] + ": " + new_episodes[i]
                 else:
-                    speech_string = speech_string + podcast_names[new_episodes[i]] + ", "
-
-            #update the latest check file
-            with open(join(self._dir, "latest_check.json"), 'w') as write_file:
-                json.dump(last_check, write_file)
+                    speech_string = speech_string + podcast_names[i] + ": " + new_episodes[i] + ", "
 
         self.speak(speech_string)
 
