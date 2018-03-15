@@ -91,11 +91,42 @@ class PodcastSkill(MycroftSkill):
 
         #Check what episode the user wants
         episode_index = 0
-        self.speak_dialog('latest')
-        time.sleep(3)
 
-        episode_title = (parsed_feed['episodes'][0]['title'])
+        #This block adds functionality for the user to choose an episode
+        while(True):
+            episode_title = parsed_feed['episodes'][episode_index]['title']
+            podcast_title = parsed_feed['title']
 
+            data_dict = {"podcast_title": podcast_title,
+                "episode_title": episode_title}
+
+            if episode_index == 0:
+                response = self.get_response('play.previous',
+                    data=data_dict,
+                    on_fail='please.repeat')
+            else:
+                response = self.get_response('play.next.previous',
+                    data=data_dict,
+                    on_fail='please.repeat')
+
+            #error check
+            if response is None:
+                break
+
+            if "stop" in response:
+                self.speak("Operation cancelled.")
+                return False
+            elif "play" in response:
+                break
+            elif "previous" in response:
+                episode_index += 1
+            elif "next" in response:
+                #ensure index doesnt go below zero
+                if episode_index != 0:
+                    episode_index -= 1
+
+        self.speak("Playing podcast.")
+        time.sleep(1)
         #some feeds have different formats, these two were the most common ones I found so it will try them both
         try:
             episode = (parsed_feed["episodes"][episode_index]["enclosures"][0]["url"])
