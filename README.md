@@ -5,6 +5,8 @@ Listen to episodes of your favourite podcasts
 Select your favourite podcasts in the home.mycroft.ai settings and listen to episodes from those podcasts.
 You can also check with Mycroft if there are any new episodes available from your chosen podcasts.
 
+You can now also scroll through all episodes of your chosen podcasts.
+
  - NOTE: Only tested on a Desktop install. I am not able test on any other platform at the moment so feedback and pull requests are welcomed to ensure this works with Mark1 and Picroft.
 
 ### Setup
@@ -31,15 +33,11 @@ James Poole
 
 ## Current state
 Working features:
- - Listen to the latest episode of your chosen podcast
+ - Listen to any episode episode of your chosen podcast
  - Use the settings in the home.mycroft.ai site to choose 3 podcasts
- - Check for newly available episodes from your chosen podcasts
+ - Check for what the most recent episodes are titled
 
 Known issues:
  - Only tested on a Desktop install. I am not able test on any other platform at the moment so feedback and pull requests are welcomed to ensure this works with Mark1 and Picroft.
  - I have tested this skill with many feed urls. Most of the urls work but some cause issue. I am working to be compatible with those urls that do not work.
  - Not sure how this skill co-operates with other podcast skills
-
-TODO:
- - Select an older podcast, not just the most recent one
- - Add compatibility for a wider range of podcasts, some feeds dont work with the current implementation
