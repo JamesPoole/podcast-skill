@@ -7,8 +7,6 @@ You can also check with Mycroft if there are any new episodes available from you
 
 You can now also scroll through all episodes of your chosen podcasts.
 
- - NOTE: Only tested on a Desktop install. I am not able test on any other platform at the moment so feedback and pull requests are welcomed to ensure this works with Mark1 and Picroft.
-
 ### Setup
 You can enter your chosen podcasts into the Skills Settings section of the home.mycroft.ai site.
 Here you have space to store 3 podcasts. For each one you need to enter a trigger word and the feed
@@ -38,6 +36,6 @@ Working features:
  - Check for what the most recent episodes are titled
 
 Known issues:
- - Only tested on a Desktop install. I am not able test on any other platform at the moment so feedback and pull requests are welcomed to ensure this works with Mark1 and Picroft.
- - I have tested this skill with many feed urls. Most of the urls work but some cause issue. I am working to be compatible with those urls that do not work.
+ - Currently I have not been able to get this to work with streams that require https. The mycroft audio service currently does not work with https streams so this is a limiting factor at the moment.
  - Not sure how this skill co-operates with other podcast skills
+ - If a word like "News" is used as the trigger word, it may clash with another skill. If this happens change the trigger word to something that avoids the clash word

@@ -127,7 +127,8 @@ class PodcastSkill(MycroftSkill):
 
         self.speak("Playing podcast.")
         time.sleep(1)
-        #some feeds have different formats, these two were the most common ones I found so it will try them both
+
+        #try and parse the rss feed, some are incompatible
         try:
             episode = (parsed_feed["episodes"][episode_index]["enclosures"][0]["url"])
         except:
@@ -137,11 +138,14 @@ class PodcastSkill(MycroftSkill):
         episode = urllib.urlopen(episode)
         redirected_episode = episode.geturl()
 
+        #convert stream to http for mpg123 compatibility
+        http_episode = re.sub('https', 'http', redirected_episode)
+
         # if audio service module is available use it
         if self.audioservice:
-            self.audioservice.play(redirected_episode, message.data['utterance'])
+            self.audioservice.play(http_episode, message.data['utterance'])
         else: # othervice use normal mp3 playback
-            self.process = play_mp3(redirected_episode)
+            self.process = play_mp3(http_episode)
 
         self.enclosure.mouth_text(episode_title)
 
