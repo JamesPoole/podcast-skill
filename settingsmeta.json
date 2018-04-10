@@ -1,9 +1,10 @@
 {
-    "name": "Mycroft Podcasts",
+    "name": "Podcast Player",
+    "color": "#17afb2",
     "skillMetadata": {
         "sections": [
             {
-                "name": "Podcast Player",
+                "name": "Select Podcasts",
                 "fields": [
                     {
                         "type": "label",

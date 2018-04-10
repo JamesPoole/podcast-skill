@@ -69,6 +69,7 @@ class PodcastSkill(MycroftSkill):
 
     def handle_play_podcast_intent(self, message):
         utter = message.data['utterance']
+	self.enclosure.mouth_think()
 
         podcast_names = [self.settings["nameone"], self.settings["nametwo"], self.settings["namethree"]]
         podcast_urls = [self.settings["feedone"], self.settings["feedtwo"], self.settings["feedthree"]]
@@ -151,6 +152,7 @@ class PodcastSkill(MycroftSkill):
 
     def handle_latest_episode_intent(self, message):
         utter = message.data['utterance']
+	self.enclosure.mouth_think()
 
         podcast_names = [self.settings["nameone"], self.settings["nametwo"], self.settings["namethree"]]
         podcast_urls = [self.settings["feedone"], self.settings["feedtwo"], self.settings["feedthree"]]
