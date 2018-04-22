@@ -21,6 +21,7 @@ import json
 
 from adapt.intent import IntentBuilder
 from mycroft.skills.core import MycroftSkill
+from mycroft.audio import wait_while_speaking
 from mycroft.util.log import getLogger
 try:
     from mycroft.skills.audioservice import AudioService
@@ -69,7 +70,7 @@ class PodcastSkill(MycroftSkill):
 
     def handle_play_podcast_intent(self, message):
         utter = message.data['utterance']
-	self.enclosure.mouth_think()
+        self.enclosure.mouth_think()
 
         podcast_names = [self.settings["nameone"], self.settings["nametwo"], self.settings["namethree"]]
         podcast_urls = [self.settings["feedone"], self.settings["feedtwo"], self.settings["feedthree"]]
@@ -127,7 +128,7 @@ class PodcastSkill(MycroftSkill):
                     episode_index -= 1
 
         self.speak("Playing podcast.")
-        time.sleep(1)
+        wait_while_speaking()
 
         #try and parse the rss feed, some are incompatible
         try:
