@@ -41,16 +41,14 @@ class PodcastSkill(MycroftSkill):
             self.audioservice = AudioService(self.emitter)
 
     def chosen_podcast(self, utter, podcast_names, podcast_urls):
-        listen_url = ""
-        for i in range(0, len(podcast_names)):
-            #check for empty podcast settings
-            if podcast_names[i] == "":
-               continue
-            try:
-                if podcast_names[i].lower() in utter.lower():
-                   listen_url = podcast_urls[i]
-            except:
-                pass
+        for index, name in enumerate(podcast_names):
+            if not name:
+                continue
+            if name.lower() in utter.lower():
+                listen_url = podcast_urls[index]
+                break
+        else:
+            listen_url = ""
         return listen_url
 
     @intent_handler(IntentBuilder("PlayPodcastIntent").require("PlayPodcastKeyword"))
