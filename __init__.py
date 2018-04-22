@@ -60,18 +60,15 @@ class PodcastSkill(MycroftSkill):
 
         podcast_names = [self.settings["nameone"], self.settings["nametwo"], self.settings["namethree"]]
         podcast_urls = [self.settings["feedone"], self.settings["feedtwo"], self.settings["feedthree"]]
-
-        listen_url = self.chosen_podcast(utter, podcast_names, podcast_urls)
-
-        #if misheard, retry and return false if Mycroft could not hear the name of the podcast
-    	try_count = 0
-        while (listen_url == "" and try_count < 2):
-            try_count += 1
-            response = self.get_response('nomatch')
-            listen_url = self.chosen_podcast(response, podcast_names, podcast_urls)
-            if try_count == 1 and listen_url == "":
-                self.speak_dialog('not.found')
-                return False
+        
+        for try_count in range(0,2):
+            listen_url = self.chosen_podcast(utter, podcast_names, podcast_urls)
+            if listen_url:
+                break
+            utter = self.get_response('nomatch')
+        else: 
+            self.speak_dialog('not.found')
+            return False   
 
         #normalise feed and parse it
         normalised_feed = pp.normalize_feed_url(listen_url)
