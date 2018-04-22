@@ -17,7 +17,7 @@ import urllib
 import re
 
 from adapt.intent import IntentBuilder
-from mycroft.skills.core import MycroftSkill
+from mycroft.skills.core import MycroftSkill, intent_handler
 from mycroft.audio import wait_while_speaking
 from mycroft.util.log import getLogger
 try:
@@ -37,17 +37,8 @@ class PodcastSkill(MycroftSkill):
         self.audioservice = None
 
     def initialize(self):
-        play_podcast_intent = IntentBuilder("PlayPodcastIntent").require(
-            "PlayPodcastKeyword").build()
-        self.register_intent(play_podcast_intent, self.handle_play_podcast_intent)
-
-        latest_episode_intent = IntentBuilder("LatestEpisodeIntent").require(
-            "LatestEpisodeKeyword").build()
-        self.register_intent(latest_episode_intent, self.handle_latest_episode_intent)
-
         if AudioService:
             self.audioservice = AudioService(self.emitter)
-
 
     def chosen_podcast(self, utter, podcast_names, podcast_urls):
         listen_url = ""
@@ -62,6 +53,7 @@ class PodcastSkill(MycroftSkill):
                 pass
         return listen_url
 
+    @intent_handler(IntentBuilder("PlayPodcastIntent").require("PlayPodcastKeyword"))
     def handle_play_podcast_intent(self, message):
         utter = message.data['utterance']
         self.enclosure.mouth_think()
@@ -145,6 +137,7 @@ class PodcastSkill(MycroftSkill):
 
         self.enclosure.mouth_text(episode_title)
 
+    @intent_handler(IntentBuilder("LatestEpisodeIntent").require("LatestEpisodeKeyword"))
     def handle_latest_episode_intent(self, message):
         utter = message.data['utterance']
 	self.enclosure.mouth_think()
