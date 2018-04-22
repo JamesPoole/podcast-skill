@@ -11,13 +11,10 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
+
 import podcastparser as pp
 import urllib
-import requests
-import time
-from os.path import dirname, join
 import re
-import json
 
 from adapt.intent import IntentBuilder
 from mycroft.skills.core import MycroftSkill
@@ -34,11 +31,8 @@ __author__ = 'jamespoole'
 LOGGER = getLogger(__name__)
 
 class PodcastSkill(MycroftSkill):
-
-    # The constructor of the skill, which calls MycroftSkill's constructor
     def __init__(self):
         super(PodcastSkill, self).__init__(name="PodcastSkill")
-
         self.process = None
         self.audioservice = None
 
