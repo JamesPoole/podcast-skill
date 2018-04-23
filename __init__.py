@@ -13,6 +13,7 @@
 # GNU General Public License for more details.
 
 import podcastparser as pp
+from os.path import dirname
 import urllib
 import re
 
@@ -42,6 +43,7 @@ class PodcastSkill(MycroftSkill):
 
     def chosen_podcast(self, utter, podcast_names, podcast_urls):
         for index, name in enumerate(podcast_names):
+            #skip if podcast slot left empty
             if not name:
                 continue
             if name.lower() in utter.lower():
@@ -174,7 +176,12 @@ class PodcastSkill(MycroftSkill):
         self.speak(speech_string)
 
     def stop(self):
-        pass
+        if self.audioservice:
+            self.audioservice.stop()
+        else:
+            if self.process and self.process.poll() is None:
+                self.process.terminate()
+                self.process.wait()
 
 def create_skill():
     return PodcastSkill()
