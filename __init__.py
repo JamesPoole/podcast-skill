@@ -11,16 +11,14 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
+
 import podcastparser as pp
+from os.path import dirname
 import urllib
-import requests
-import time
-from os.path import dirname, join
 import re
-import json
 
 from adapt.intent import IntentBuilder
-from mycroft.skills.core import MycroftSkill
+from mycroft.skills.core import MycroftSkill, intent_handler
 from mycroft.audio import wait_while_speaking
 from mycroft.util.log import getLogger
 try:
@@ -34,58 +32,43 @@ __author__ = 'jamespoole'
 LOGGER = getLogger(__name__)
 
 class PodcastSkill(MycroftSkill):
-
-    # The constructor of the skill, which calls MycroftSkill's constructor
     def __init__(self):
         super(PodcastSkill, self).__init__(name="PodcastSkill")
-
         self.process = None
         self.audioservice = None
 
     def initialize(self):
-        play_podcast_intent = IntentBuilder("PlayPodcastIntent").require(
-            "PlayPodcastKeyword").build()
-        self.register_intent(play_podcast_intent, self.handle_play_podcast_intent)
-
-        latest_episode_intent = IntentBuilder("LatestEpisodeIntent").require(
-            "LatestEpisodeKeyword").build()
-        self.register_intent(latest_episode_intent, self.handle_latest_episode_intent)
-
         if AudioService:
             self.audioservice = AudioService(self.emitter)
 
-
     def chosen_podcast(self, utter, podcast_names, podcast_urls):
-        listen_url = ""
-        for i in range(0, len(podcast_names)):
-            #check for empty podcast settings
-            if podcast_names[i] == "":
-               continue
-            try:
-                if podcast_names[i].lower() in utter.lower():
-                   listen_url = podcast_urls[i]
-            except:
-                pass
+        for index, name in enumerate(podcast_names):
+            #skip if podcast slot left empty
+            if not name:
+                continue
+            if name.lower() in utter.lower():
+                listen_url = podcast_urls[index]
+                break
+        else:
+            listen_url = ""
         return listen_url
 
+    @intent_handler(IntentBuilder("PlayPodcastIntent").require("PlayPodcastKeyword"))
     def handle_play_podcast_intent(self, message):
         utter = message.data['utterance']
         self.enclosure.mouth_think()
 
         podcast_names = [self.settings["nameone"], self.settings["nametwo"], self.settings["namethree"]]
         podcast_urls = [self.settings["feedone"], self.settings["feedtwo"], self.settings["feedthree"]]
-
-        listen_url = self.chosen_podcast(utter, podcast_names, podcast_urls)
-
-        #if misheard, retry and return false if Mycroft could not hear the name of the podcast
-    	try_count = 0
-        while (listen_url == "" and try_count < 2):
-            try_count += 1
-            response = self.get_response('nomatch')
-            listen_url = self.chosen_podcast(response, podcast_names, podcast_urls)
-            if try_count == 1 and listen_url == "":
-                self.speak_dialog('not.found')
-                return False
+        
+        for try_count in range(0,2):
+            listen_url = self.chosen_podcast(utter, podcast_names, podcast_urls)
+            if listen_url:
+                break
+            utter = self.get_response('nomatch')
+        else: 
+            self.speak_dialog('not.found')
+            return False   
 
         #normalise feed and parse it
         normalised_feed = pp.normalize_feed_url(listen_url)
@@ -151,48 +134,53 @@ class PodcastSkill(MycroftSkill):
 
         self.enclosure.mouth_text(episode_title)
 
+    @intent_handler(IntentBuilder("LatestEpisodeIntent").require("LatestEpisodeKeyword"))
     def handle_latest_episode_intent(self, message):
         utter = message.data['utterance']
-	self.enclosure.mouth_think()
+        self.enclosure.mouth_think()
 
         podcast_names = [self.settings["nameone"], self.settings["nametwo"], self.settings["namethree"]]
         podcast_urls = [self.settings["feedone"], self.settings["feedtwo"], self.settings["feedthree"]]
 
         #check if the user specified a podcast to check for a new podcast
-        for i in range(0, len(podcast_names)):
+        for index, name in enumerate(podcast_names):
             #skip if podcast slot left empty
-            if podcast_names[i] == "":
+            if not name:
                 continue
-            elif podcast_names[i].lower() in utter.lower():
-                parsed_feed = pp.parse(podcast_urls[i], urllib.urlopen(podcast_urls[i]))
+            if name.lower() in utter.lower():
+                parsed_feed = pp.parse(podcast_urls[index], 
+                                urllib.urlopen(podcast_urls[index]))
                 last_episode = (parsed_feed['episodes'][0]['title'])
 
-                speech_string = "The latest episode of " + podcast_names[i] + " is " + last_episode
-                self.speak(speech_string)
-                return True
+                speech_string = "The latest episode of " + name + " is " + last_episode
+                break
+        else:
+            #if no podcast names are provided, list all new episodes
+            new_episodes = []
+            for index, url in enumerate(podcast_urls):
+                #skip if url slot left empty
+                if not url:
+                    continue
+                parsed_feed = pp.parse(podcast_urls[index], 
+                                urllib.urlopen(podcast_urls[index]))
+                last_episode = (parsed_feed['episodes'][0]['title'])
+                new_episodes.append(last_episode)
 
-        #if no podcast names are provided, list all new episodes
-        new_episodes = []
-        for i in range(0, len(podcast_urls)):
-            if not podcast_urls[i]:
-                continue
-            parsed_feed = pp.parse(podcast_urls[i], urllib.urlopen(podcast_urls[i]))
-            last_episode = (parsed_feed['episodes'][0]['title'])
-            new_episodes.append(last_episode)
-
+            #skip if i[0] slot left empty
+            elements = [": ".join(i) for i in zip(podcast_names, new_episodes) if i[0]]
+                
             speech_string = "The latest episodes are the following: "
-
-            for i in range(0, len(new_episodes)):
-                #if the podcast is the last in a list add "and" before the podcast name
-                if i == (len(new_episodes)-1) and i > 0:
-                    speech_string = speech_string + "and " + podcast_names[i] + ": " + new_episodes[i]
-                else:
-                    speech_string = speech_string + podcast_names[i] + ": " + new_episodes[i] + ", "
+            speech_string += ", ".join(elements[:-2] + [" and ".join(elements[-2:])])
 
         self.speak(speech_string)
 
     def stop(self):
-        pass
+        if self.audioservice:
+            self.audioservice.stop()
+        else:
+            if self.process and self.process.poll() is None:
+                self.process.terminate()
+                self.process.wait()
 
 def create_skill():
     return PodcastSkill()
