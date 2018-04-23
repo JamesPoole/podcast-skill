@@ -152,26 +152,25 @@ class PodcastSkill(MycroftSkill):
                                 urllib.urlopen(podcast_urls[index]))
                 last_episode = (parsed_feed['episodes'][0]['title'])
 
-                self.speak("The latest episode of " + name + " is " + last_episode)
-                return True
+                speech_string = "The latest episode of " + name + " is " + last_episode
+                break
+        else:
+            #if no podcast names are provided, list all new episodes
+            new_episodes = []
+            for index, url in enumerate(podcast_urls):
+                #skip if url slot left empty
+                if not url:
+                    continue
+                parsed_feed = pp.parse(podcast_urls[index], 
+                                urllib.urlopen(podcast_urls[index]))
+                last_episode = (parsed_feed['episodes'][0]['title'])
+                new_episodes.append(last_episode)
 
-        #if no podcast names are provided, list all new episodes
-        new_episodes = []
-        for i in range(0, len(podcast_urls)):
-            if not podcast_urls[i]:
-                continue
-            parsed_feed = pp.parse(podcast_urls[i], urllib.urlopen(podcast_urls[i]))
-            last_episode = (parsed_feed['episodes'][0]['title'])
-            new_episodes.append(last_episode)
-
+            #skip if i[0] slot left empty
+            elements = [": ".join(i) for i in zip(podcast_names, new_episodes) if i[0]]
+                
             speech_string = "The latest episodes are the following: "
-
-            for i in range(0, len(new_episodes)):
-                #if the podcast is the last in a list add "and" before the podcast name
-                if i == (len(new_episodes)-1) and i > 0:
-                    speech_string = speech_string + "and " + podcast_names[i] + ": " + new_episodes[i]
-                else:
-                    speech_string = speech_string + podcast_names[i] + ": " + new_episodes[i] + ", "
+            speech_string += ", ".join(elements[:-2] + [" and ".join(elements[-2:])])
 
         self.speak(speech_string)
 
