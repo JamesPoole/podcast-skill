@@ -137,22 +137,22 @@ class PodcastSkill(MycroftSkill):
     @intent_handler(IntentBuilder("LatestEpisodeIntent").require("LatestEpisodeKeyword"))
     def handle_latest_episode_intent(self, message):
         utter = message.data['utterance']
-	self.enclosure.mouth_think()
+        self.enclosure.mouth_think()
 
         podcast_names = [self.settings["nameone"], self.settings["nametwo"], self.settings["namethree"]]
         podcast_urls = [self.settings["feedone"], self.settings["feedtwo"], self.settings["feedthree"]]
 
         #check if the user specified a podcast to check for a new podcast
-        for i in range(0, len(podcast_names)):
+        for index, name in enumerate(podcast_names):
             #skip if podcast slot left empty
-            if podcast_names[i] == "":
+            if not name:
                 continue
-            elif podcast_names[i].lower() in utter.lower():
-                parsed_feed = pp.parse(podcast_urls[i], urllib.urlopen(podcast_urls[i]))
+            if name.lower() in utter.lower():
+                parsed_feed = pp.parse(podcast_urls[index], 
+                                urllib.urlopen(podcast_urls[index]))
                 last_episode = (parsed_feed['episodes'][0]['title'])
 
-                speech_string = "The latest episode of " + podcast_names[i] + " is " + last_episode
-                self.speak(speech_string)
+                self.speak("The latest episode of " + name + " is " + last_episode)
                 return True
 
         #if no podcast names are provided, list all new episodes
