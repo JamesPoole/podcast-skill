@@ -13,8 +13,8 @@
 # GNU General Public License for more details.
 
 import podcastparser as pp
-from os.path import dirname
 import urllib
+from urllib.request import Request
 import re
 
 from adapt.intent import IntentBuilder
@@ -29,13 +29,12 @@ except:
 
 __author__ = 'jamespoole'
 
-LOGGER = getLogger(__name__)
-
 class PodcastSkill(MycroftSkill):
     def __init__(self):
         super(PodcastSkill, self).__init__(name="PodcastSkill")
         self.process = None
         self.audioservice = None
+        self.user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11' 
 
     def initialize(self):
         if AudioService:
@@ -72,7 +71,7 @@ class PodcastSkill(MycroftSkill):
 
         #normalise feed and parse it
         normalised_feed = pp.normalize_feed_url(listen_url)
-        parsed_feed = pp.parse(normalised_feed, urllib.urlopen(normalised_feed))
+        parsed_feed = pp.parse(normalised_feed, urllib.request.urlopen(Request(normalised_feed, data=None, headers={'User-Agent': self.user_agent})))
 
         #Check what episode the user wants
         episode_index = 0
@@ -120,7 +119,7 @@ class PodcastSkill(MycroftSkill):
             self.speak_dialog('badrss')
 
         #check for any redirects
-        episode = urllib.urlopen(episode)
+        episode = urllib.request.urlopen(Request(episode, data=None, headers={'User-Agent': self.user_agent}))
         redirected_episode = episode.geturl()
 
         #convert stream to http for mpg123 compatibility
@@ -149,7 +148,7 @@ class PodcastSkill(MycroftSkill):
                 continue
             if name.lower() in utter.lower():
                 parsed_feed = pp.parse(podcast_urls[index], 
-                                urllib.urlopen(podcast_urls[index]))
+                                urllib.request.urlopen(Request(podcast_urls[index], data=None, headers={'User-Agent': self.user_agent})))
                 last_episode = (parsed_feed['episodes'][0]['title'])
 
                 speech_string = "The latest episode of " + name + " is " + last_episode
@@ -162,7 +161,7 @@ class PodcastSkill(MycroftSkill):
                 if not url:
                     continue
                 parsed_feed = pp.parse(podcast_urls[index], 
-                                urllib.urlopen(podcast_urls[index]))
+                                urllib.request.urlopen(Request(podcast_urls[index], data=None, headers={'User-Agent': self.user_agent})))
                 last_episode = (parsed_feed['episodes'][0]['title'])
                 new_episodes.append(last_episode)
 
