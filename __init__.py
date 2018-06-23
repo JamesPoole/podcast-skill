@@ -18,7 +18,7 @@ from urllib.request import Request
 import re
 
 from adapt.intent import IntentBuilder
-from mycroft.skills.core import MycroftSkill, intent_handler
+from mycroft.skills.core import MycroftSkill, intent_file_handler
 from mycroft.audio import wait_while_speaking
 from mycroft.util.log import getLogger
 try:
@@ -52,7 +52,7 @@ class PodcastSkill(MycroftSkill):
             listen_url = ""
         return listen_url
 
-    @intent_handler(IntentBuilder("PlayPodcastIntent").require("PlayPodcastKeyword"))
+    @intent_file_handler('PlayPodcast.intent')
     def handle_play_podcast_intent(self, message):
         utter = message.data['utterance']
         self.enclosure.mouth_think()
@@ -133,7 +133,7 @@ class PodcastSkill(MycroftSkill):
 
         self.enclosure.mouth_text(episode_title)
 
-    @intent_handler(IntentBuilder("LatestEpisodeIntent").require("LatestEpisodeKeyword"))
+    @intent_file_handler('LatestEpisode.intent')
     def handle_latest_episode_intent(self, message):
         utter = message.data['utterance']
         self.enclosure.mouth_think()
