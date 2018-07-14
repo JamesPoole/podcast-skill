@@ -14,14 +14,14 @@
                         "name": "nameone",
                         "type": "text",
                         "label": "Name to trigger PODCAST 1",
-                        "value": "",
+                        "value": "Linux Unplugged",
                         "placeholder": "Podcast 1 Name"
                     },
                     {
                         "name": "feedone",
                         "type": "text",
                         "label": "RSS Feed for PODCAST 1",
-                        "value": "",
+                        "value": "https://linuxunplugged.fireside.fm/rss",
                         "placeholder": "Podcast 1 RSS URL"
                     },
                     {
