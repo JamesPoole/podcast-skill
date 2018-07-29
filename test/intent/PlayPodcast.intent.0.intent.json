@@ -1,5 +1,5 @@
 {
     "expected_dialog": "play.previous",
     "intent_type": "PlayPodcast.intent",
-    "utterance": "play the podcast reply-all"
+    "utterance": "play the podcast linux unplugged"
 }
