@@ -28,28 +28,28 @@
                         "name": "nametwo",
                         "type": "text",
                         "label": "Name to trigger PODCAST 2",
-                        "value": "",
+                        "value": "The Infinite Monkey Cage",
                         "placeholder": "Podcast 2 Name"
                     },
                     {
                         "name": "feedtwo",
                         "type": "text",
                         "label": "RSS Feed for PODCAST 2",
-                        "value": "",
+                        "value": "https://podcasts.files.bbci.co.uk/b00snr0w.rss",
                         "placeholder": "Podcast 2 RSS URL"
                     },
                     {
                         "name": "namethree",
                         "type": "text",
                         "label": "Name to trigger PODCAST 3",
-                        "value": "",
+                        "value": "Happier",
                         "placeholder": "Podcast 3 Name"
                     },
                     {
                         "name": "feedthree",
                         "type": "text",
                         "label": "RSS Feed for PODCAST 3",
-                        "value": "",
+                        "value": "https://feeds.megaphone.fm/happier",
                         "placeholder": "Podcast 3 RSS URL"
                     }
                 ]

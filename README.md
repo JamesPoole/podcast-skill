@@ -16,7 +16,7 @@ of the podcast (If the podcast has an unusual name like "The Nerdist" that Mycro
 you can change the trigger word to something clearer like "Nerd").
  - The feed url is a url that can usually be found on the podcasts website under the RSS logo.
 
-(Linux Unplugged is a podcast that is included by default for demonstration purposes)
+I have included some example feeds but you can change these out to the podcasts that you would like to have!
 
 ## Examples
 
