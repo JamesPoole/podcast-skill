@@ -22,6 +22,7 @@ from mycroft.skills.core import intent_file_handler  # , MycroftSkill
 from mycroft.audio import wait_while_speaking
 from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel
 from mycroft.audio.services.vlc import VlcService
+from mycroft.util.parse import match_one, fuzzy_match
 
 __author__ = 'jamespoole'
 
@@ -52,8 +53,9 @@ class PodcastSkill(CommonPlaySkill):
         if not self.mediaplayer:
             return None
 
-        confidence = 0.0
         data = None
+        best_index = -1
+        best_confidence = 0.0
 
         if 'podcast' in phrase.lower():
             bonus = 0.1
@@ -62,11 +64,31 @@ class PodcastSkill(CommonPlaySkill):
 
         podcast_names = [self.settings["nameone"], self.settings["nametwo"], self.settings["namethree"]]
         podcast_urls = [self.settings["feedone"], self.settings["feedtwo"], self.settings["feedthree"]]
-        # TODO: fuzzy matching
+
+        # fuzzy matching
+        for index, name in enumerate(podcast_names):
+            confidence = min(fuzzy_match(name.lower(), phrase.lower()) + bonus,
+                             1.0)
+            if confidence > best_confidence:
+                best_index = index
+                best_confidence = confidence
+            self.log.debug("index {}, name {}, confidence {}".format(index, name, confidence))
+
+        # check for exact match
         data = self.chosen_podcast(phrase, podcast_names, podcast_urls)
 
         if data:
             confidence = CPSMatchLevel.EXACT
+        elif best_index >= 0:
+            data = podcast_urls[best_index]
+            if best_confidence > 0.9:
+                confidence = CPSMatchLevel.EXACT
+            elif best_confidence > 0.6:
+                confidence = CPSMatchLevel.TITLE
+            elif best_confidence > 0.1:
+                confidence = CPSMatchLevel.CATEGORY
+            else:
+                confidence = CPSMatchLevel.GENERIC
 
         self.log.info("phrase: {} confidence: {} data: {}".format(phrase,
                                                                   confidence,
