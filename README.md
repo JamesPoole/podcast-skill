@@ -23,6 +23,10 @@ I have included some example feeds but you can change these out to the podcasts 
 
 ## Credits
 James Poole (@JamesPoole)
+[@domcross](https://github.com/domcross)
+[@LinusS1](https://github.com/LinusS1)
+[@backassward](https://github.com/backassward)
+[@zasghu](https://github.com/zasghu)
 
 ## Category
 **Entertainment**
